@@ -6,11 +6,13 @@ runner {
     enabled = true
     data_source "git" {
         url  = "https://github.com/Yann-Etrillard/forge.git"
-        ref  = "main"
+        ref  = "var.datacenter"
+        // ref  = "main"
         path = "Sonarqube/sonarqube-app"
         ignore_changes_outside_path = true
     }
 }
+
 
 app "forge/sonarqube-app" {
 
