@@ -5,14 +5,14 @@ labels = { "domaine" = "forge" }
 runner {
     enabled = true
     data_source "git" {
-        url  = "https://github.com/kguilloux-gh/test_forge.git"
+        url  = "https://github.com/Yann-Etrillard/forge.git"
         ref  = "main"
-        path = "dev/squashtm-app"
+        path = "Sonarqube/sonarqube-app"
         ignore_changes_outside_path = true
     }
 }
 
-app "forge/squashtm-app" {
+app "forge/sonarqube-app" {
 
     build {
         use "docker-pull" {
@@ -24,7 +24,7 @@ app "forge/squashtm-app" {
   
     deploy{
         use "nomad-jobspec" {
-            jobspec = templatefile("${path.app}/forge-squashtm-premium.nomad.tpl", {
+            jobspec = templatefile("${path.app}/forge-sonarqube.nomad.tpl", {
             image   = var.image
             tag     = var.tag
             datacenter = var.datacenter
@@ -40,10 +40,10 @@ variable "datacenter" {
 
 variable "image" {
     type    = string
-    default = "squashtest/squash-tm"
+    default = "sonarqube/sonarqube"
 }
 
 variable "tag" {
     type    = string
-    default = "4.0.2"
+    default = "7.9.2-community"
 }
