@@ -45,5 +45,5 @@ variable "image" {
 
 variable "tag" {
     type    = string
-    default = "7.9.2-community"
+    default = "8.9-developer"
 }
