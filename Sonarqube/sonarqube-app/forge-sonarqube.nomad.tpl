@@ -24,7 +24,7 @@ job "forge-sonarqube" {
             port "http" { to = 8080 }
         }
 
-        task "squashtm" {
+        task "sonarqube" {
             driver = "docker"
             template {
                 data = <<EOH
