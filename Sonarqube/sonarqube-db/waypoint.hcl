@@ -1,18 +1,18 @@
-project = "forge/squashtm-db"
+project = "forge/sonaqube-db"
 
 labels = { "domaine" = "forge" }
 
 runner {
     enabled = true
     data_source "git" {
-        url  = "https://github.com/kguilloux-gh/test_forge.git"
+        url  = "https://github.com/Yann-Etrillard/forge.git"
         ref  = "main"
-        path = "dev/squashtm-db"
+        path = "Sonarqube/sonarqube-bd"
         ignore_changes_outside_path = true
     }
 }
 
-app "forge/squashtm-db" {
+app "forge/sonaqube-db" {
 
     build {
         use "docker-pull" {
@@ -24,7 +24,7 @@ app "forge/squashtm-db" {
   
     deploy{
         use "nomad-jobspec" {
-            jobspec = templatefile("${path.app}/forge-squashtm-postgresql.nomad.tpl", {
+            jobspec = templatefile("${path.app}/forge-sonarqube-postgresql.nomad.tpl", {
             image   = var.image
             tag     = var.tag
             datacenter = var.datacenter
@@ -43,7 +43,8 @@ variable "image" {
     default = "postgres"
 }
 
+#On l'a laisse en latest? (si modfie voir squash-db)
 variable "tag" {
     type    = string
-    default = "latest"
+    default = "9.6.10"
 }

@@ -1,11 +1,11 @@
-job "forge-squashtm-postgresql" {
+job "forge-sonarqube-postgresql" {
     datacenters = ["${datacenter}"]
     type = "service"
     vault {
         policies = ["forge"]
         change_mode = "restart"
     }
-    group "squashtm-postgresql" {
+    group "sonarqube-postgresql" {
         count ="1"
         
         restart {
@@ -28,9 +28,12 @@ job "forge-squashtm-postgresql" {
             driver = "docker"
             template {
                 data = <<EOH
-POSTGRES_DB = {{ with secret "forge/squashtm" }}{{ .Data.data.sqtm_db_name }}{{ end }}
-POSTGRES_USER = {{ with secret "forge/squashtm" }}{{ .Data.data.sqtm_db_username }}{{ end }}
-POSTGRES_PASSWORD = {{ with secret "forge/squashtm" }}{{ .Data.data.sqtm_db_password }}{{ end }}
+POSTGRES_DB = sonar
+# POSTGRES_DB = {{ with secret "forge/squashtm" }}{{ .Data.data.sqtm_db_name }}{{ end }}
+{{ with secret "forge/sonarqube" }}
+POSTGRES_USER={{ .Data.data.username }}
+POSTGRES_PASSWORD={{ .Data.data.password }}
+{{ end }}
                 EOH
                 destination = "secrets/file.env"
                 change_mode = "restart"
@@ -40,7 +43,7 @@ POSTGRES_PASSWORD = {{ with secret "forge/squashtm" }}{{ .Data.data.sqtm_db_pass
             config {
                 image   = "${image}:${tag}"
                 ports   = ["postgres"]
-                volumes = ["name=forge-squashtm-db,io_priority=high,size=25,repl=2:/var/lib/postgresql/data"]
+                volumes = ["name=forge-sonarqube-db,io_priority=high,size=25,repl=2:/var/lib/postgresql/data"]
                 volume_driver = "pxd"
             }
             resources {
