@@ -36,7 +36,6 @@ SONAR_JDBC_PASSWORD={{ .Data.data.password }}
 LDAP_BINDPASSWORD={{ .Data.data.ldap_password }} # LDAP password
 {{ end }}
 SONAR_JDBC_URL=jdbc:postgresql://{{ range service "forge-sonarqube-postgresql" }}{{.Address}}{{ end }}:{{ range service "forge-sonarqube-postgresql" }}{{.Port}}{{ end }}/sonar
-# SONAR_JDBC_URL=jdbc:postgresql://vma181250795.qual.henix.asip.hst.fluxus.net/sonar?currentSchema=sonar
 SONAR_WEB_CONTEXT=/sonar
 
 # LDAP
@@ -45,7 +44,6 @@ SONAR_SECURITY_REALM=LDAP
 SONAR_SECURITY_SAVEPASSWORD=true
 LDAP_URL=ldap://10.3.8.44
 LDAP_BINDDN=cn=Manager,dc=asipsante,dc=fr
-
 # User Configuration
 LDAP_USER_BASEDN=ou=People,dc=asipsante,dc=fr
 LDAP_USER_REQUEST=(&(objectClass=inetOrgPerson)(uid={login}))
