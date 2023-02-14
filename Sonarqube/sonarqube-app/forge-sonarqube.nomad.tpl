@@ -28,13 +28,13 @@ job "forge-sonarqube" {
         task "sonarqube" {
             # Ajout de plugins en artifact
             artifact {
-	    	    source = "https://repo.forge.ans.henix.fr:443/artifactory/ext-tools/qualimetrie/sonarqube-plugins/sonar-cnes-report-4.1.3.jar"
+	    	    source = "https://repo.proxy.dev.forge.esante.gouv.fr/artifactory/ext-tools/qualimetrie/sonarqube-plugins/sonar-cnes-report-4.1.3.jar"
 		        options {
-			        archive = false # Pour ne pas que l'archive ce decompresse
+			        archive = false # Pour ne pas que l'archive ce décompresse
 		        }
 	        }
             artifact {
-	    	    source = "https://repo.forge.ans.henix.fr:443/artifactory/ext-tools/qualimetrie/sonarqube-plugins/sonar-dependency-check-plugin-3.0.1.jar"
+	    	    source = "https://repo.proxy.dev.forge.esante.gouv.fr/artifactory/ext-tools/qualimetrie/sonarqube-plugins/sonar-dependency-check-plugin-3.0.1.jar"
 		        options {
 			        archive = false
 		        }
