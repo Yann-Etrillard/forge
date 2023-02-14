@@ -26,6 +26,20 @@ job "forge-sonarqube" {
             }
         }
         task "sonarqube" {
+            # Ajout de plugins en artifact
+            artifact {
+	    	    source = "https://repo.forge.ans.henix.fr:443/artifactory/ext-tools/qualimetrie/sonarqube-plugins/sonar-cnes-report-4.1.3.jar"
+		        options {
+			        archive = false # Pour ne pas que l'archive ce decompresse
+		        }
+	        }
+            artifact {
+	    	    source = "https://repo.forge.ans.henix.fr:443/artifactory/ext-tools/qualimetrie/sonarqube-plugins/sonar-dependency-check-plugin-3.0.1.jar"
+		        options {
+			        archive = false
+		        }
+	        }
+
             driver = "docker"
 
             template {
@@ -66,8 +80,28 @@ LDAP_GROUP_REQUEST=(&(objectClass=posixGroup)(memberUid={uid}))
                     "name=sonarqube_extensions,io_priority=high,size=25,repl=2:/opt/sonarqube/extensions",
                     "name=sonarqube_logs,io_priority=high,size=25,repl=2:/opt/sonarqube/logs"
                 ]
-            }
 
+                # Mise en pace des plugins
+                mount {
+                    type = "bind"
+                    target = "/opt/extensions/plugins/plugins/sonar-cnes-report-4.1.3.jar"
+                    source = "local/sonar-cnes-report-4.1.3.jar"
+                    readonly = false
+                    bind_options {
+                        propagation = "rshared"
+                    }
+                }
+                mount {
+                    type = "bind"
+                    target = "/opt/extensions/plugins/sonar-dependency-check-plugin-3.0.1.jar"
+                    source = "local/sonar-dependency-check-plugin-3.0.1.jar"
+                    readonly = false
+                    bind_options {
+                        propagation = "rshared"
+                    }
+                }                
+            }
+            
             resources {
                 cpu    = 600
                 memory = 6144 #4096
