@@ -29,14 +29,14 @@
             template {
                 data = <<EOH
 
-# POSTGRES_DB = {{ with secret "forge/sonarqube" }}{{ .Data.data.db_name }}{{ end }}
-# {{ with secret "forge/sonarqube" }}
-# POSTGRES_USER={{ .Data.data.username }}
-# POSTGRES_PASSWORD={{ .Data.data.password }}
-# {{ end }}
+POSTGRES_DB = {{ with secret "forge/sonarqube" }}{{ .Data.data.db_name }}{{ end }}
+{{ with secret "forge/sonarqube" }}
+POSTGRES_USER={{ .Data.data.username }}
+POSTGRES_PASSWORD={{ .Data.data.password }}
+{{ end }}
 
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=postgres
+# POSTGRES_USER=sonar
+# POSTGRES_PASSWORD=sonar
 
                 EOH
                 destination = "secrets/file.env"

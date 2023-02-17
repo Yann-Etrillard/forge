@@ -42,8 +42,8 @@ job "forge-sonarqube" {
             template {
                 data = <<EOH
 {{ with secret "forge/sonarqube" }}
-SONAR_JDBC_USERNAME={{ .Data.data.username }}
-SONAR_JDBC_PASSWORD={{ .Data.data.password }}
+SONAR_JDBC_USERNAME={{ .Data.data.psql_username }}
+SONAR_JDBC_PASSWORD={{ .Data.data.psql_password }}
 LDAP_BINDPASSWORD={{ .Data.data.ldap_password }} # LDAP password
 {{ end }}
 SONAR_JDBC_URL=jdbc:postgresql://{{ range service "forge-sonarqube-postgresql" }}{{.Address}}{{ end }}:{{ range service "forge-sonarqube-postgresql" }}{{.Port}}{{ end }}/sonar
