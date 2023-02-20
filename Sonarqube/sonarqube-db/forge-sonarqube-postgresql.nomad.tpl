@@ -31,8 +31,8 @@
 
 POSTGRES_DB = {{ with secret "forge/sonarqube" }}{{ .Data.data.db_name }}{{ end }}
 {{ with secret "forge/sonarqube" }}
-POSTGRES_USER={{ .Data.data.username }}
-POSTGRES_PASSWORD={{ .Data.data.password }}
+POSTGRES_USER={{ .Data.data.psql_username }}
+POSTGRES_PASSWORD={{ .Data.data.psql_password }}
 {{ end }}
 
 # POSTGRES_USER=sonar
