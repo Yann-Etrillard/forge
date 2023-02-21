@@ -7,7 +7,45 @@ job "forge-sonarqube" {
     }
     group "sonarqube" {
         count ="1"
-        
+
+        task "prep-sonar-extention" {
+            driver = "docker"
+            config {
+                image = "busybox:latest"
+                mount {
+                    type = "volume"
+                    target = "/opt/sonarqube/extensions"
+                    source = "sonarqube_extensions"
+                    readonly = false
+                    volume_options {
+                        no_copy = false
+                        driver_config {
+                            name = "pxd"
+                            options {
+                                io_priority = "high"
+                                size = 2
+                                repl = 1
+                            }
+                        }
+                    }
+                }
+                command = "sh"
+                args = ["-c", "chown -R 1000:1000 /opt/sonarqube/extensions"]
+            }
+
+            resources {
+                cpu = 100
+                memory = 64
+            }
+            lifecycle {
+                hook = "prestart"
+                sidecar = "false"
+            }
+        }
+
+
+
+
         restart {
             attempts = 3
             delay = "60s"
@@ -25,7 +63,11 @@ job "forge-sonarqube" {
                 to = 9000
             }
         }
-        task "sonarqube" {
+
+
+
+
+        task "sonarqube" {           
             # Ajout de plugins en artifact
             artifact {
 	    	    source = "http://repo.proxy-dev-forge.asip.hst.fluxus.net/artifactory/ext-tools/qualimetrie/sonarqube-plugins/sonar-cnes-report-4.1.3.jar"
@@ -73,10 +115,58 @@ LDAP_GROUP_REQUEST=(&(objectClass=posixGroup)(memberUid={uid}))
             config {
                 image   = "${image}:${tag}"
                 ports   = ["http"]
-                volumes = [
-                    "name=sonarqube_extensions,io_priority=high,size=25,repl=2:/opt/sonarqube/extensions",
-                    "name=sonarqube_logs,io_priority=high,size=25,repl=2:/opt/sonarqube/logs"
-                ]
+
+                mount {
+                    type = "volume"
+                    target = "/opt/sonarqube/data"
+                    source = "sonarqube_data"
+                    readonly = false
+                    volume_options {
+                        no_copy = false
+                        driver_config {
+                            name = "pxd"
+                            options {
+                                io_priority = "high"
+                                size = 2
+                                repl = 1
+                            }
+                        }
+                    }
+                }             
+                mount {
+                    type = "volume"
+                    target = "/opt/sonarqube/extensions"
+                    source = "sonarqube_extensions"
+                    readonly = false
+                    volume_options {
+                        no_copy = false
+                        driver_config {
+                            name = "pxd"
+                            options {
+                                io_priority = "high"
+                                size = 2
+                                repl = 1
+                            }
+                        }
+                    }
+                } 
+                mount {
+                    type = "volume"
+                    target = "/opt/sonarqube/logs"
+                    source = "sonarqube_logs"
+                    readonly = false
+                    volume_options {
+                        no_copy = false
+                        driver_config {
+                            name = "pxd"
+                            options {
+                                io_priority = "high"
+                                size = 2
+                                repl = 1
+                            }
+                        }
+                    }
+                } 
 
                 # Mise en pace des plugins
                 mount {
@@ -99,6 +189,7 @@ LDAP_GROUP_REQUEST=(&(objectClass=posixGroup)(memberUid={uid}))
                 }                
             }
             
+
             resources {
                 cpu    = 600
                 memory = 6144 #4096
