@@ -64,9 +64,6 @@ job "forge-sonarqube" {
             }
         }
 
-
-
-
         task "sonarqube" {           
             # Ajout de plugins en artifact
             artifact {
@@ -107,7 +104,7 @@ LDAP_GROUP_BASEDN=ou=group,dc=asipsante,dc=fr
 LDAP_GROUP_REQUEST=(&(objectClass=posixGroup)(memberUid={uid}))
 
                 EOH
-                destination = "local/file.env"
+                destination = "secrets/file.env"
                 change_mode = "restart"
                 env = true
             }
