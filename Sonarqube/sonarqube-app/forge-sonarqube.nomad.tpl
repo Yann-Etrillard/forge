@@ -83,6 +83,8 @@ job "forge-sonarqube" {
 {{ with secret "forge/sonarqube" }}
 SONAR_JDBC_USERNAME={{ .Data.data.psql_username }}
 SONAR_JDBC_PASSWORD={{ .Data.data.psql_password }}
+
+LDAP_URL=ldap://{{ .Data.data.ldap_ip }}
 LDAP_BINDPASSWORD={{ .Data.data.ldap_password }} # LDAP password
 {{ end }}
 SONAR_JDBC_URL=jdbc:postgresql://{{ range service "forge-sonarqube-postgresql" }}{{.Address}}{{ end }}:{{ range service "forge-sonarqube-postgresql" }}{{.Port}}{{ end }}/sonar?currentSchema=sonar
@@ -92,7 +94,6 @@ SONAR_WEB_CONTEXT=/sonar
 # ACTIVE DIRECTORY
 SONAR_SECURITY_REALM=LDAP
 SONAR_SECURITY_SAVEPASSWORD=true
-LDAP_URL=ldap://10.3.8.44
 LDAP_BINDDN=cn=Manager,dc=asipsante,dc=fr
 # User Configuration
 LDAP_USER_BASEDN=ou=People,dc=asipsante,dc=fr
