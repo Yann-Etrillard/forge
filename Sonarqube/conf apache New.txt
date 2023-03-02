@@ -1,0 +1,100 @@
+############################################
+# Lien vers l'outil de qualimétrie (Sonar)                       #
+############################################
+
+<VirtualHost *:443>
+
+    ServerName qual.forge.asipsante.fr # Modif
+    DocumentRoot "/etc/httpd/htdocs/qual" # Modif
+
+    <Directory /etc/httpd/htdocs/rhodecode>
+        Order Deny,Allow
+        Allow from All
+        Options -Indexes -Includes -FollowSymLinks -ExecCGI
+    </Directory>
+
+    <Location ~ "/*">
+        SSLRequire (%{SSL_CLIENT_I_DN_OU} eq "AC-CLASSE-4" \
+            and %{SSL_CLIENT_S_DN_OU} eq "318751275100020" \
+            and %{SSL_CLIENT_S_DN_CN} in {"proxy-prod-forge.asipsante.fr",\
+                "proxy.dev.forge.esante.gouv.fr",\
+                "proxy.prod.forge.esante.gouv.fr",\
+                "proxy-dev-front02.asipsante.fr",\
+                "proxy.asip.asipsante.fr",\
+                "proxy.forge.asipsante.fr",\
+                "slnxasipforge01.ptx.fr.sopra"}) \
+            or (%{SSL_CLIENT_I_DN_CN} eq "GIP-CPS CLASSE-3" \
+            and %{SSL_CLIENT_S_DN_OU} eq "318751275100020") \
+            or (%{SSL_CLIENT_S_DN_C} eq "FR" \
+            and %{SSL_CLIENT_S_DN_ST} eq "Paris (75)" \
+            and %{SSL_CLIENT_S_DN_O} in {"AGENCE DES SYSTEMES D'INFORMATION PARTAG",\
+                "AGENCE DU NUMERIQUE EN SANTE"} \
+            and %{SSL_CLIENT_S_DN_OU} =~ m#^318751275100020/title=Personnel autoris.*#)\
+            or (%{SSL_CLIENT_S_DN_C} eq "FR" \
+            and %{SSL_CLIENT_S_DN_ST} eq "Paris (75)" \
+            and %{SSL_CLIENT_S_DN_O} in {"AGENCE DES SYSTEMES D'INFORMATION PARTAG",\
+                "AGENCE DU NUMERIQUE EN SANTE"} \
+            and %{SSL_CLIENT_S_DN_OU} eq "318751275100020" \
+            and %{SSL_CLIENT_S_DN_CN} in {"proxy-prod-forge.asipsante.fr",\
+                "proxy.dev.forge.esante.gouv.fr",\
+                "proxy-dev-front02.asipsante.fr",\
+                "proxy.prod.forge.esante.gouv.fr",\
+                "proxy.asip.asipsante.fr",\
+                "proxy.forge.asipsante.fr",\
+                "slnxasipforge01.ptx.fr.sopra",\
+                "forge.ans.henix.fr",\
+                "SWORD_SVN_GED"}) \
+            or (%{SSL_CLIENT_S_DN_C} eq "FR" \
+            and %{SSL_CLIENT_S_DN_ST} eq "Val d'Oise (95)" \
+            and %{SSL_CLIENT_S_DN_O} eq "ATOS INTEGRATION" \
+            and %{SSL_CLIENT_S_DN_OU} eq "340802471900572" \
+            and %{SSL_CLIENT_S_DN_CN} in {"proxy-ans.atos-infogerance.fr"})
+    </Location>
+
+    RequestHeader set X-Forwarded-Proto "https"
+
+    <Proxy *>
+      Order allow,deny
+      Allow from all
+    </Proxy>
+
+    # Directive to properly generate url (clone url) for RhodeCode
+    ProxyPreserveHost On
+	
+    # SSL setup
+    SSLVerifyClient  require
+    ProxyRequests On
+    SSLEngine On
+    SSLCertificateFile /etc/ssl/certs/rhodecode.forge.asipsante.fr.crt
+    SSLCertificateKeyFile /etc/ssl/certs/rhodecode.forge.asipsante.fr.key
+
+    # It allows request bodies to be sent to the backend using chunked transfer encoding.
+    SetEnv proxy-sendchunked 1
+
+    SetEnv proxy-initial-not-pooled 1
+
+    # Increase headers size for large Mercurial headers sent with many branches
+    LimitRequestLine 16380
+	
+    # strict http prevents from https -> http downgrade
+    Header always set Strict-Transport-Security "max-age=63072000; includeSubdomains; preload"
+
+    # Set x-frame options
+    Header always append X-Frame-Options SAMEORIGIN
+
+    <Proxy "balancer://fabiolb2">
+       BalancerMember "http://[IP_HOST1_PLATEFORME_CONTENEUR]:9999" keepalive=Off
+       BalancerMember "http://[IP_HOST2_PLATEFORME_CONTENEUR]:9999" keepalive=Off
+       BalancerMember "http://[IP_HOST3_PLATEFORME_CONTENEUR]:9999" keepalive=Off
+    </Proxy>
+
+    ProxyPass "/" "balancer://fabiolb2/"
+    KeepAlive On
+    KeepAliveTimeout 1600
+    ProxyPassReverse "/" "balancer://fabiolb2/"
+
+    ErrorLog /etc/httpd/logs/error_rhodecode_log
+    CustomLog /etc/httpd/logs/access_rhodecode_log common
+    LogLevel info
+    
+</VirtualHost>

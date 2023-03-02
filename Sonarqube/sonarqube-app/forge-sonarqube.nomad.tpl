@@ -29,22 +29,28 @@ job "forge-sonarqube" {
 
         task "sonarqube" {           
             # Ajout de plugins en artifact
-            {{ with secret "forge/sonarqube" }}
+            
             artifact {
-	    	    source = "https://repo.forge.ans.henix.fr:443/artifactory/ext-tools/qualimetrie/sonarqube-plugins/{{ .Data.data.sonar-cnes-report }}"
-                        # "http://repo.proxy-dev-forge.asip.hst.fluxus.net/artifactory/ext-tools/qualimetrie/sonarqube-plugins/sonar-cnes-report-4.1.3.jar"
-                        # "https://repo.forge.ans.henix.fr:443/artifactory/ext-tools/qualimetrie/sonarqube-plugins/{{ .Data.data.sonar-cnes-report }}"
+	    	    source = "http://repo.proxy-dev-forge.asip.hst.fluxus.net/artifactory/ext-tools/qualimetrie/sonarqube-plugins/sonar-cnes-report-4.1.3.jar"
+                # https://repo.forge.ans.henix.fr:443/artifactory/ext-tools/qualimetrie/sonarqube-plugins/sonar-cnes-report-4.1.3.jar
+                options {
+		            archive = false
+  		        }
 	        }
             artifact {
-	    	    source = "https://repo.forge.ans.henix.fr:443/artifactory/ext-tools/qualimetrie/sonarqube-plugins/{{ .Data.data.sonar-dependency-check }}"
-                        # "http://repo.proxy-dev-forge.asip.hst.fluxus.net/artifactory/ext-tools/qualimetrie/sonarqube-plugins/sonar-dependency-check-plugin-3.0.1.jar"
-                        # "https://repo.forge.ans.henix.fr:443/artifactory/ext-tools/qualimetrie/sonarqube-plugins/{{ .Data.data.sonar-dependency-check }}"
-		        }
-            artifact { # Certificat
-	    	    source = "https://repo.forge.ans.henix.fr/ui/repos/tree/General/asip-ac%2Ftruststore%2Fcacerts"
-		        }
-            {{ with secret "forge/sonarqube" }}
-	        }
+	    	    source = "http://repo.proxy-dev-forge.asip.hst.fluxus.net/artifactory/ext-tools/qualimetrie/sonarqube-plugins/sonar-dependency-check-plugin-3.0.1.jar"
+                # https://repo.forge.ans.henix.fr:443/artifactory/ext-tools/qualimetrie/sonarqube-plugins/sonar-dependency-check-plugin-3.0.1.jar
+                options {
+		            archive = false
+  		        }
+		    }
+            # artifact { # Certificat
+	    	#     source = "https://repo.forge.ans.henix.fr/ui/repos/tree/General/asip-ac%2Ftruststore%2Fcacerts"
+            #                     options {
+		    #         archive = false
+  		    #     }
+		    # }
+	    # }
 
 # https://repo.forge.ans.henix.fr/ui/repos/tree/General/asip-ac%2Ftruststore%2Fcacerts
 # /opt/java/openjdk/lib/security
@@ -88,7 +94,7 @@ LDAP_GROUP_REQUEST=(&(objectClass=posixGroup)(memberUid={uid}))
 
                 mount {
                     type = "volume"
-                    target = "/opt/sonarqube/data/es7/"
+                    target = "/opt/sonarqube/data/"
                     source = "sonarqube_data"
                     readonly = false
                     volume_options {
@@ -104,31 +110,10 @@ LDAP_GROUP_REQUEST=(&(objectClass=posixGroup)(memberUid={uid}))
                     }
                 }             
 
-                # mount {
-                #     type = "volume"
-                #     target = "/opt/sonarqube/logs"
-                #     source = "sonarqube_logs"
-                #     readonly = false
-                #     volume_options {
-                #         no_copy = false
-                #         driver_config {
-                #             name = "pxd"
-                #             options {
-                #                 io_priority = "high"
-                #                 size = 2
-                #                 repl = 1
-                #             }
-                #         }
-                #     }
-                # } 
-
                 # Mise en pace des plugins
                 mount {
                     type = "bind"
-                    {{ with secret "forge/sonarqube" }}
-                    target = "/opt/sonarqube/extensions/plugins/{{ .Data.data.sonar-cnes-report }}
-                    {{ end }}
-                    # target = "/opt/sonarqube/extensions/plugins/sonar-cnes-report-4.1.3.jar"
+                    target = "/opt/sonarqube/extensions/plugins/sonar-cnes-report-4.1.3.jar"
                     source = "local/sonar-cnes-report-4.1.3.jar"
                     readonly = true
                     bind_options {
@@ -137,10 +122,7 @@ LDAP_GROUP_REQUEST=(&(objectClass=posixGroup)(memberUid={uid}))
                 }
                 mount {
                     type = "bind"
-                    {{ with secret "forge/sonarqube" }}
-                    target = "/opt/sonarqube/extensions/plugins/{{ .Data.data.sonar-cnes-report }}
-                    {{ end }}
-                    # target = "/opt/sonarqube/extensions/plugins/sonar-dependency-check-plugin-3.0.1.jar"
+                    target = "/opt/sonarqube/extensions/plugins/sonar-dependency-check-plugin-3.0.1.jar"
                     source = "local/sonar-dependency-check-plugin-3.0.1.jar"
                     readonly = true
                     bind_options {
@@ -152,7 +134,7 @@ LDAP_GROUP_REQUEST=(&(objectClass=posixGroup)(memberUid={uid}))
 
             resources {
                 cpu    = 600
-                memory = 6144 #4096
+                memory = 6144
             }
             
             service {
