@@ -8,43 +8,6 @@ job "forge-sonarqube" {
     group "sonarqube" {
         count ="1"
 
-        task "prep-sonar-extention" {
-            driver = "docker"
-            config {
-                image = "busybox:latest"
-                mount {
-                    type = "volume"
-                    target = "/opt/sonarqube/extensions"
-                    source = "sonarqube_extensions"
-                    readonly = false
-                    volume_options {
-                        no_copy = false
-                        driver_config {
-                            name = "pxd"
-                            options {
-                                io_priority = "high"
-                                size = 2
-                                repl = 1
-                            }
-                        }
-                    }
-                }
-                command = "sh"
-                args = ["-c", "chown -R 1000:1000 /opt/sonarqube/extensions"]
-            }
-
-            resources {
-                cpu = 100
-                memory = 64
-            }
-            lifecycle {
-                hook = "prestart"
-                sidecar = "false"
-            }
-        }
-
-
-
 
         restart {
             attempts = 3
@@ -66,16 +29,25 @@ job "forge-sonarqube" {
 
         task "sonarqube" {           
             # Ajout de plugins en artifact
+            {{ with secret "forge/sonarqube" }}
             artifact {
-	    	    source = "http://repo.proxy-dev-forge.asip.hst.fluxus.net/artifactory/ext-tools/qualimetrie/sonarqube-plugins/sonar-cnes-report-4.1.3.jar"
+	    	    source = "https://repo.forge.ans.henix.fr:443/artifactory/ext-tools/qualimetrie/sonarqube-plugins/{{ .Data.data.sonar-cnes-report }}"
+                        # "http://repo.proxy-dev-forge.asip.hst.fluxus.net/artifactory/ext-tools/qualimetrie/sonarqube-plugins/sonar-cnes-report-4.1.3.jar"
+                        # "https://repo.forge.ans.henix.fr:443/artifactory/ext-tools/qualimetrie/sonarqube-plugins/{{ .Data.data.sonar-cnes-report }}"
 	        }
             artifact {
-	    	    source = "http://repo.proxy-dev-forge.asip.hst.fluxus.net/artifactory/ext-tools/qualimetrie/sonarqube-plugins/sonar-dependency-check-plugin-3.0.1.jar"
-		        options {
-			        archive = false
+	    	    source = "https://repo.forge.ans.henix.fr:443/artifactory/ext-tools/qualimetrie/sonarqube-plugins/{{ .Data.data.sonar-dependency-check }}"
+                        # "http://repo.proxy-dev-forge.asip.hst.fluxus.net/artifactory/ext-tools/qualimetrie/sonarqube-plugins/sonar-dependency-check-plugin-3.0.1.jar"
+                        # "https://repo.forge.ans.henix.fr:443/artifactory/ext-tools/qualimetrie/sonarqube-plugins/{{ .Data.data.sonar-dependency-check }}"
 		        }
+            artifact { # Certificat
+	    	    source = "https://repo.forge.ans.henix.fr/ui/repos/tree/General/asip-ac%2Ftruststore%2Fcacerts"
+		        }
+            {{ with secret "forge/sonarqube" }}
 	        }
 
+# https://repo.forge.ans.henix.fr/ui/repos/tree/General/asip-ac%2Ftruststore%2Fcacerts
+# /opt/java/openjdk/lib/security
             driver = "docker"
 
             template {
@@ -116,7 +88,7 @@ LDAP_GROUP_REQUEST=(&(objectClass=posixGroup)(memberUid={uid}))
 
                 mount {
                     type = "volume"
-                    target = "/opt/sonarqube/data"
+                    target = "/opt/sonarqube/data/es7/"
                     source = "sonarqube_data"
                     readonly = false
                     volume_options {
@@ -131,56 +103,46 @@ LDAP_GROUP_REQUEST=(&(objectClass=posixGroup)(memberUid={uid}))
                         }
                     }
                 }             
-                mount {
-                    type = "volume"
-                    target = "/opt/sonarqube/extensions"
-                    source = "sonarqube_extensions"
-                    readonly = false
-                    volume_options {
-                        no_copy = false
-                        driver_config {
-                            name = "pxd"
-                            options {
-                                io_priority = "high"
-                                size = 2
-                                repl = 1
-                            }
-                        }
-                    }
-                } 
-                mount {
-                    type = "volume"
-                    target = "/opt/sonarqube/logs"
-                    source = "sonarqube_logs"
-                    readonly = false
-                    volume_options {
-                        no_copy = false
-                        driver_config {
-                            name = "pxd"
-                            options {
-                                io_priority = "high"
-                                size = 2
-                                repl = 1
-                            }
-                        }
-                    }
-                } 
+
+                # mount {
+                #     type = "volume"
+                #     target = "/opt/sonarqube/logs"
+                #     source = "sonarqube_logs"
+                #     readonly = false
+                #     volume_options {
+                #         no_copy = false
+                #         driver_config {
+                #             name = "pxd"
+                #             options {
+                #                 io_priority = "high"
+                #                 size = 2
+                #                 repl = 1
+                #             }
+                #         }
+                #     }
+                # } 
 
                 # Mise en pace des plugins
                 mount {
                     type = "bind"
-                    target = "/opt/sonarqube/extensions/plugins/sonar-cnes-report-4.1.3.jar"
+                    {{ with secret "forge/sonarqube" }}
+                    target = "/opt/sonarqube/extensions/plugins/{{ .Data.data.sonar-cnes-report }}
+                    {{ end }}
+                    # target = "/opt/sonarqube/extensions/plugins/sonar-cnes-report-4.1.3.jar"
                     source = "local/sonar-cnes-report-4.1.3.jar"
-                    readonly = false
+                    readonly = true
                     bind_options {
                         propagation = "rshared"
                     }
                 }
                 mount {
                     type = "bind"
-                    target = "/opt/sonarqube/extensions/plugins/sonar-dependency-check-plugin-3.0.1.jar"
+                    {{ with secret "forge/sonarqube" }}
+                    target = "/opt/sonarqube/extensions/plugins/{{ .Data.data.sonar-cnes-report }}
+                    {{ end }}
+                    # target = "/opt/sonarqube/extensions/plugins/sonar-dependency-check-plugin-3.0.1.jar"
                     source = "local/sonar-dependency-check-plugin-3.0.1.jar"
-                    readonly = false
+                    readonly = true
                     bind_options {
                         propagation = "rshared"
                     }
@@ -196,6 +158,7 @@ LDAP_GROUP_REQUEST=(&(objectClass=posixGroup)(memberUid={uid}))
             service {
                 name = "$\u007BNOMAD_JOB_NAME\u007D"
                 tags = ["urlprefix-sonarqube.forge.dev.henix.asipsante.fr/"]
+                # tags = ["urlprefix-qual.forge.asipsante.fr/"] # Serveur name de prod
                 port = "http"
                 check {
                     name     = "alive"

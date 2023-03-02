@@ -46,6 +46,5 @@ variable "image" {
 #On l'a laisse en latest? (si modfie voir squash-db)
 variable "tag" {
     type    = string
-    // default = "9.6.10"
     default = "15.2"
 }
