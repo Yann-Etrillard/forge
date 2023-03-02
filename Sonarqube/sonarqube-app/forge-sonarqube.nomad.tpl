@@ -195,7 +195,7 @@ LDAP_GROUP_REQUEST=(&(objectClass=posixGroup)(memberUid={uid}))
             
             service {
                 name = "$\u007BNOMAD_JOB_NAME\u007D"
-                tags = ["urlprefix-qual.forge.asipsante.fr/"]
+                tags = ["urlprefix-qual.forge.henix.asipsante.fr/"]
                 port = "http"
                 check {
                     name     = "alive"
