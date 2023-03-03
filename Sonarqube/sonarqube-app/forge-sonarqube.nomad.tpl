@@ -27,9 +27,10 @@ job "forge-sonarqube" {
             }
         }
 
+
+
         task "sonarqube" {           
-            # Ajout de plugins en artifact
-            
+            # Ajout de plugins
             artifact {
 	    	    source = "http://repo.proxy-dev-forge.asip.hst.fluxus.net/artifactory/ext-tools/qualimetrie/sonarqube-plugins/sonar-cnes-report-4.1.3.jar"
                 # https://repo.forge.ans.henix.fr:443/artifactory/ext-tools/qualimetrie/sonarqube-plugins/sonar-cnes-report-4.1.3.jar
@@ -44,17 +45,18 @@ job "forge-sonarqube" {
 		            archive = false
   		        }
 		    }
-            # artifact { # Certificat
-	    	#     source = "https://repo.forge.ans.henix.fr/ui/repos/tree/General/asip-ac%2Ftruststore%2Fcacerts"
-            #                     options {
-		    #         archive = false
-  		    #     }
-		    # }
-	    # }
 
-# https://repo.forge.ans.henix.fr/ui/repos/tree/General/asip-ac%2Ftruststore%2Fcacerts
-# /opt/java/openjdk/lib/security
+            artifact { # Certificat
+	    	    source = "http://repo.proxy-dev-forge.asip.hst.fluxus.net/artifactory/asip-ac/truststore/cacerts"
+                # https://repo.forge.ans.henix.fr:443/artifactory/asip-ac/truststore/cacerts
+                options {
+		            archive = false
+  		        }
+		    }
+	    
             driver = "docker"
+
+
 
             template {
                 data = <<EOH
@@ -63,7 +65,7 @@ SONAR_JDBC_USERNAME={{ .Data.data.psql_username }}
 SONAR_JDBC_PASSWORD={{ .Data.data.psql_password }}
 
 LDAP_URL=ldap://{{ .Data.data.ldap_ip }}
-LDAP_BINDPASSWORD={{ .Data.data.ldap_password }} # LDAP password
+LDAP_BINDPASSWORD={{ .Data.data.ldap_password }}
 {{ end }}
 SONAR_JDBC_URL=jdbc:postgresql://{{ range service "forge-sonarqube-postgresql" }}{{.Address}}{{ end }}:{{ range service "forge-sonarqube-postgresql" }}{{.Port}}{{ end }}/sonar?currentSchema=sonar
 SONAR_WEB_CONTEXT=/sonar
@@ -128,9 +130,19 @@ LDAP_GROUP_REQUEST=(&(objectClass=posixGroup)(memberUid={uid}))
                     bind_options {
                         propagation = "rshared"
                     }
-                }                
+                }    
+                # Certificat    
+                mount {
+                    type = "bind"
+                    target = "/opt/java/openjdk/lib/security/cacerts"
+                    source = "local/cacerts"
+                    readonly = true
+                    bind_options {
+                        propagation = "rshared"
+                    }
+                } 
+
             }
-            
 
             resources {
                 cpu    = 600
@@ -151,6 +163,7 @@ LDAP_GROUP_REQUEST=(&(objectClass=posixGroup)(memberUid={uid}))
                     port     = "http"
                 }
             }
+
         } 
     }
 }
