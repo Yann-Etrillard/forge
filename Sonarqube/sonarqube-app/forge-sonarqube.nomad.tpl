@@ -48,7 +48,7 @@ job "forge-sonarqube" {
 
             artifact { # Certificat
 	    	    source = "http://repo.proxy-dev-forge.asip.hst.fluxus.net/artifactory/asip-ac/truststore/cacerts"
-                # https://repo.forge.ans.henix.fr:443/artifactory/asip-ac/truststore/cacerts
+                # source = "https://repo.forge.ans.henix.fr:443/artifactory/asip-ac/truststore/cacerts" # Prod
                 options {
 		            archive = false
   		        }
@@ -56,7 +56,15 @@ job "forge-sonarqube" {
 	    
             driver = "docker"
 
-
+            template {
+                data = <<EOH
+{{ with secret "forge/sonarqube" }}
+{{ .Data.data.token_sonar }}
+{{ end }}
+                EOH
+                destination = "secrets/sonar-secret.txt"
+                change_mode = "restart"
+            }
 
             template {
                 data = <<EOH
@@ -141,7 +149,16 @@ LDAP_GROUP_REQUEST=(&(objectClass=posixGroup)(memberUid={uid}))
                         propagation = "rshared"
                     }
                 } 
-
+                # token    
+                mount {
+                    type = "bind"
+                    target = "/home/sonar/.sonar/sonar-secret.txt"
+                    source = "secrets/sonar-secret.txt"
+                    readonly = true
+                    bind_options {
+                        propagation = "rshared"
+                    }
+                } 
             }
 
             resources {
