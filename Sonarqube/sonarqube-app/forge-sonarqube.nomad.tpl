@@ -58,9 +58,8 @@ job "forge-sonarqube" {
 
             template {
                 data = <<EOH
-{{ with secret "forge/sonarqube" }}
-{{ .Data.data.token_sonar }}
-{{ end }}
+
+Thzrq1VHFBJq4ujqfUElNA==
                 EOH
                 destination = "secrets/sonar-secret.txt"
                 change_mode = "restart"
@@ -77,6 +76,8 @@ LDAP_BINDPASSWORD={{ .Data.data.ldap_password }}
 {{ end }}
 SONAR_JDBC_URL=jdbc:postgresql://{{ range service "forge-sonarqube-postgresql" }}{{.Address}}{{ end }}:{{ range service "forge-sonarqube-postgresql" }}{{.Port}}{{ end }}/sonar?currentSchema=sonar
 SONAR_WEB_CONTEXT=/sonar
+
+SONAR_SECRETKEYPATH=/opt/sonarqube/.sonar/sonar-secret.txt
 
 # LDAP
 # ACTIVE DIRECTORY
@@ -152,7 +153,7 @@ LDAP_GROUP_REQUEST=(&(objectClass=posixGroup)(memberUid={uid}))
                 # token    
                 mount {
                     type = "bind"
-                    target = "/home/sonar/.sonar/sonar-secret.txt"
+                    target = "/opt/sonarqube/.sonar/sonar-secret.txt"
                     source = "secrets/sonar-secret.txt"
                     readonly = true
                     bind_options {
@@ -168,7 +169,7 @@ LDAP_GROUP_REQUEST=(&(objectClass=posixGroup)(memberUid={uid}))
             
             service {
                 name = "$\u007BNOMAD_JOB_NAME\u007D"
-                tags = ["urlprefix-qual.forge.henix.asipsante.fr/"]
+                tags = ["urlprefix-qual.forge.henix.asipsante.fr"]
                 # tags = ["urlprefix-qual.forge.asipsante.fr/"] # Serveur name de prod
                 port = "http"
                 check {
