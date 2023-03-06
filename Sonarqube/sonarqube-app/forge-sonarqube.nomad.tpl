@@ -1,10 +1,12 @@
 job "forge-sonarqube" {
     datacenters = ["${datacenter}"]
     type = "service"
+
     vault {
         policies = ["forge"]
         change_mode = "restart"
     }
+
     group "sonarqube" {
         count ="1"
 
@@ -27,19 +29,18 @@ job "forge-sonarqube" {
             }
         }
 
+        task "sonarqube" {
 
-
-        task "sonarqube" {           
             # Ajout de plugins
             artifact {
-	    	    source = "http://repo.proxy-dev-forge.asip.hst.fluxus.net/artifactory/ext-tools/qualimetrie/sonarqube-plugins/sonar-cnes-report-4.1.3.jar"
+	    	    source = "http://repo.proxy-dev-forge.asip.hst.fluxus.net/artifactory/ext-tools/qualimetrie/sonarqube-plugins/$\u007BSONAR_CNES_REPORT\u007D"
                 # https://repo.forge.ans.henix.fr:443/artifactory/ext-tools/qualimetrie/sonarqube-plugins/sonar-cnes-report-4.1.3.jar
                 options {
 		            archive = false
   		        }
 	        }
             artifact {
-	    	    source = "http://repo.proxy-dev-forge.asip.hst.fluxus.net/artifactory/ext-tools/qualimetrie/sonarqube-plugins/sonar-dependency-check-plugin-3.0.1.jar"
+	    	    source = "http://repo.proxy-dev-forge.asip.hst.fluxus.net/artifactory/ext-tools/qualimetrie/sonarqube-plugins/$\u007BSONAR_DEPENDENCY_CHECK\u007D"
                 # https://repo.forge.ans.henix.fr:443/artifactory/ext-tools/qualimetrie/sonarqube-plugins/sonar-dependency-check-plugin-3.0.1.jar
                 options {
 		            archive = false
@@ -52,14 +53,15 @@ job "forge-sonarqube" {
                 options {
 		            archive = false
   		        }
-		    }
-	    
+		    }           
+
             driver = "docker"
 
             template {
                 data = <<EOH
-
-Thzrq1VHFBJq4ujqfUElNA==
+{{ with secret "forge/sonarqube" }}
+{{ .Data.data.token_sonar }}
+{{ end }}
                 EOH
                 destination = "secrets/sonar-secret.txt"
                 change_mode = "restart"
@@ -75,8 +77,9 @@ LDAP_URL=ldap://{{ .Data.data.ldap_ip }}
 LDAP_BINDPASSWORD={{ .Data.data.ldap_password }}
 {{ end }}
 SONAR_JDBC_URL=jdbc:postgresql://{{ range service "forge-sonarqube-postgresql" }}{{.Address}}{{ end }}:{{ range service "forge-sonarqube-postgresql" }}{{.Port}}{{ end }}/sonar?currentSchema=sonar
-SONAR_WEB_CONTEXT=/sonar
 
+SONAR_WEB_CONTEXT=/sonar
+SONAR_UPDATECENTER_ACTIVATE=false
 SONAR_SECRETKEYPATH=/opt/sonarqube/.sonar/sonar-secret.txt
 
 # LDAP
@@ -93,11 +96,17 @@ LDAP_USER_EMAILATTRIBUTE=mail
 LDAP_GROUP_BASEDN=ou=group,dc=asipsante,dc=fr
 LDAP_GROUP_REQUEST=(&(objectClass=posixGroup)(memberUid={uid}))
 
+# Configuration des plugins
+{{ with secret "forge/sonarqube" }}
+SONAR_CNES_REPORT={{ .Data.data.sonar-cnes-report }}
+SONAR_DEPENDENCY_CHECK={{ .Data.data.sonar-dependency-check }}
+{{ end }}
                 EOH
                 destination = "secrets/file.env"
                 change_mode = "restart"
                 env = true
             }
+
 
             config {
                 image   = "${image}:${tag}"
@@ -124,8 +133,8 @@ LDAP_GROUP_REQUEST=(&(objectClass=posixGroup)(memberUid={uid}))
                 # Mise en pace des plugins
                 mount {
                     type = "bind"
-                    target = "/opt/sonarqube/extensions/plugins/sonar-cnes-report-4.1.3.jar"
-                    source = "local/sonar-cnes-report-4.1.3.jar"
+                    target = "/opt/sonarqube/extensions/plugins/$\u007BSONAR_CNES_REPORT\u007D"
+                    source = "local/$\u007BSONAR_CNES_REPORT\u007D"
                     readonly = true
                     bind_options {
                         propagation = "rshared"
@@ -133,8 +142,8 @@ LDAP_GROUP_REQUEST=(&(objectClass=posixGroup)(memberUid={uid}))
                 }
                 mount {
                     type = "bind"
-                    target = "/opt/sonarqube/extensions/plugins/sonar-dependency-check-plugin-3.0.1.jar"
-                    source = "local/sonar-dependency-check-plugin-3.0.1.jar"
+                    target = "/opt/sonarqube/extensions/plugins/$\u007BSONAR_DEPENDENCY_CHECK\u007D"
+                    source = "local/$\u007BSONAR_DEPENDENCY_CHECK\u007D"
                     readonly = true
                     bind_options {
                         propagation = "rshared"
