@@ -29,6 +29,10 @@ app "forge/sonarqube-app" {
             image   = var.image
             tag     = var.tag
             datacenter = var.datacenter
+
+            SONAR_CNES_REPORT = var.SONAR_CNES_REPORT
+            SONAR_DEPENDENCY_CHECK = var.SONAR_DEPENDENCY_CHECK
+
             })
         }
     }

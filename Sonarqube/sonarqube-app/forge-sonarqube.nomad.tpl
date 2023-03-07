@@ -28,11 +28,6 @@ job "forge-sonarqube" {
                 to = 9000
             }
         }
-        
-
-# SONAR_CNES_REPORT=sonar-cnes-report-4.1.3.jar
-# SONAR_DEPENDENCY_CHECK=sonar-dependency-check-plugin-3.0.1.jar
-
 
         task "sonarqube" {
             driver = "docker"
@@ -47,7 +42,7 @@ job "forge-sonarqube" {
 	        }
             artifact {
 	    	    source = "http://repo.proxy-dev-forge.asip.hst.fluxus.net/artifactory/ext-tools/qualimetrie/sonarqube-plugins/$\u007BSONAR_DEPENDENCY_CHECK\u007D"
-                # https://repo.forge.ans.henix.fr:443/artifactory/ext-tools/qualimetrie/sonarqube-plugins/sonar-dependency-check-plugin-3.0.1.jar
+                # source = "https://repo.forge.ans.henix.fr:443/artifactory/ext-tools/qualimetrie/sonarqube-plugins/sonar-dependency-check-plugin-3.0.1.jar" # Prod
                 options {
 		            archive = false
   		        }
@@ -59,9 +54,7 @@ job "forge-sonarqube" {
                 options {
 		            archive = false
   		        }
-		    }           
-
-
+		    }
 
             template {
                 data = <<EOH
@@ -75,21 +68,17 @@ job "forge-sonarqube" {
 
             template {
                 data = <<EOH
-{{ with secret "forge/sonarqube" }}
-SONAR_JDBC_USERNAME={{ .Data.data.psql_username }}
-SONAR_JDBC_PASSWORD={{ .Data.data.psql_password }}
-
-LDAP_URL=ldap://{{ .Data.data.ldap_ip }}
-LDAP_BINDPASSWORD={{ .Data.data.ldap_password }}
-{{ end }}
-SONAR_JDBC_URL=jdbc:postgresql://{{ range service "forge-sonarqube-postgresql" }}{{.Address}}{{ end }}:{{ range service "forge-sonarqube-postgresql" }}{{.Port}}{{ end }}/sonar?currentSchema=sonar
-
+# SonarQube Configuration
 SONAR_WEB_CONTEXT=/sonar
 SONAR_UPDATECENTER_ACTIVATE=false
 SONAR_SECRETKEYPATH=/opt/sonarqube/.sonar/sonar-secret.txt
-
-# LDAP
-# ACTIVE DIRECTORY
+# JDBC Configuration
+SONAR_JDBC_USERNAME={{ with secret "forge/sonarqube" }}{{ .Data.data.psql_username }}{{ end }}
+SONAR_JDBC_PASSWORD={{ with secret "forge/sonarqube" }}{{ .Data.data.psql_password }}{{ end }}
+SONAR_JDBC_URL=jdbc:postgresql://{{ range service "forge-sonarqube-postgresql" }}{{.Address}}{{ end }}:{{ range service "forge-sonarqube-postgresql" }}{{.Port}}{{ end }}/sonar?currentSchema=sonar
+# LDAP Configuration
+LDAP_URL=ldap://{{ with secret "forge/sonarqube" }}{{ .Data.data.ldap_ip }}{{ end }}
+LDAP_BINDPASSWORD={{ with secret "forge/sonarqube" }}{{ .Data.data.ldap_password }}{{ end }}
 SONAR_SECURITY_REALM=LDAP
 SONAR_SECURITY_SAVEPASSWORD=true
 LDAP_BINDDN=cn=Manager,dc=asipsante,dc=fr
@@ -101,13 +90,11 @@ LDAP_USER_EMAILATTRIBUTE=mail
 # Group Configuration
 LDAP_GROUP_BASEDN=ou=group,dc=asipsante,dc=fr
 LDAP_GROUP_REQUEST=(&(objectClass=posixGroup)(memberUid={uid}))
-
                 EOH
                 destination = "secrets/file.env"
                 change_mode = "restart"
                 env = true
             }
-
 
             config {
                 image   = "${image}:${tag}"
