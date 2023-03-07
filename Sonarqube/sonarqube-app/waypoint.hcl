@@ -15,11 +15,11 @@ runner {
 
 app "forge/sonarqube-app" {
 
+
     build {
         use "docker-pull" {
             image = var.image
             tag   = var.tag
-            
             sonarcnesreport = var.sonarcnesreport
             sonarkdependencycheck = var.sonarkdependencycheck
 
@@ -33,7 +33,6 @@ app "forge/sonarqube-app" {
             image   = var.image
             tag     = var.tag
             datacenter = var.datacenter
-
             sonarcnesreport = var.sonarcnesreport
             sonarkdependencycheck = var.sonarkdependencycheck
 
