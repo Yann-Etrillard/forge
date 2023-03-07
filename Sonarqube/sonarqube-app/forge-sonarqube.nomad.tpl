@@ -31,20 +31,18 @@ job "forge-sonarqube" {
 
         task "sonarqube" {
             driver = "docker"
-                        $\u007sonarcnesreport\u007D
-            $\u007sonarkdependencycheck\u007D
             # Ajout de plugins
             artifact {
-	    	    source = "http://repo.proxy-dev-forge.asip.hst.fluxus.net/artifactory/ext-tools/qualimetrie/sonarqube-plugins/sonar-cnes-report-4.1.3.jar"
-                # source = "http://repo.proxy-dev-forge.asip.hst.fluxus.net/artifactory/ext-tools/qualimetrie/sonarqube-plugins/$\u007sonarcnesreport\u007D"
+	    	    # source = "http://repo.proxy-dev-forge.asip.hst.fluxus.net/artifactory/ext-tools/qualimetrie/sonarqube-plugins/sonar-cnes-report-4.1.3.jar"
+                source = "http://repo.proxy-dev-forge.asip.hst.fluxus.net/artifactory/ext-tools/qualimetrie/sonarqube-plugins/${sonarcnesreport}"
                 # source = "https://repo.forge.ans.henix.fr:443/artifactory/ext-tools/qualimetrie/sonarqube-plugins/sonar-cnes-report-4.1.3.jar"
                 options {
 		            archive = false
   		        }
 	        }
             artifact {
-                source = "http://repo.proxy-dev-forge.asip.hst.fluxus.net/artifactory/ext-tools/qualimetrie/sonarqube-plugins/sonar-dependency-check-plugin-3.0.1.jar"
-	    	    # source = "http://repo.proxy-dev-forge.asip.hst.fluxus.net/artifactory/ext-tools/qualimetrie/sonarqube-plugins/$\u007sonarkdependencycheck\u007D"
+                # source = "http://repo.proxy-dev-forge.asip.hst.fluxus.net/artifactory/ext-tools/qualimetrie/sonarqube-plugins/sonar-dependency-check-plugin-3.0.1.jar"
+	    	    source = "http://repo.proxy-dev-forge.asip.hst.fluxus.net/artifactory/ext-tools/qualimetrie/sonarqube-plugins/${sonarkdependencycheck}"
                 # source = "https://repo.forge.ans.henix.fr:443/artifactory/ext-tools/qualimetrie/sonarqube-plugins/sonar-dependency-check-plugin-3.0.1.jar" # Prod
                 options {
 		            archive = false
@@ -124,9 +122,9 @@ LDAP_GROUP_REQUEST=(&(objectClass=posixGroup)(memberUid={uid}))
                 # Mise en pace des plugins
                 mount {
                     type = "bind"
-                    target = "/opt/sonarqube/extensions/plugins/sonar-cnes-report-4.1.3.jar"
-                    # target = "/opt/sonarqube/extensions/plugins/$\u007sonarcnesreport\u007D"
-                    source = "local/$\u007BSONAR_CNES_REPORT\u007D"
+                    # target = "/opt/sonarqube/extensions/plugins/sonar-cnes-report-4.1.3.jar"
+                    target = "/opt/sonarqube/extensions/plugins/${sonarcnesreport}"
+                    source = "local/${sonarcnesreport}"
                     readonly = true
                     bind_options {
                         propagation = "rshared"
@@ -134,9 +132,9 @@ LDAP_GROUP_REQUEST=(&(objectClass=posixGroup)(memberUid={uid}))
                 }
                 mount {
                     type = "bind"
-                    target = "/opt/sonarqube/extensions/plugins/sonar-dependency-check-plugin-3.0.1.jar"
-                    # target = "/opt/sonarqube/extensions/plugins/$\u007sonarkdependencycheck\u007D"
-                    source = "local/$\u007BSONAR_DEPENDENCY_CHECK\u007D"
+                    # target = "/opt/sonarqube/extensions/plugins/sonar-dependency-check-plugin-3.0.1.jar"
+                    target = "/opt/sonarqube/extensions/plugins/${sonarkdependencycheck}"
+                    source = "local/${sonarkdependencycheck}"
                     readonly = true
                     bind_options {
                         propagation = "rshared"
