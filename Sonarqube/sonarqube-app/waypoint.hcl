@@ -19,9 +19,6 @@ app "forge/sonarqube-app" {
         use "docker-pull" {
             image = var.image
             tag   = var.tag
-
-
-
             disable_entrypoint = true
         }
     }
@@ -33,7 +30,7 @@ app "forge/sonarqube-app" {
             tag     = var.tag
             datacenter = var.datacenter
             sonarcnesreport = var.sonarcnesreport
-            sonarkdependencycheck = var.sonarkdependencycheck
+            sonardependencycheck = var.sonardependencycheck
 
             })
         }
@@ -52,14 +49,14 @@ variable "image" {
 
 variable "tag" {
     type    = string
-    default = "9.9-developer"
+    default = "8.9-developer"
 }
 
 variable "sonarcnesreport" {
     type    = string
     default = "sonar-cnes-report-4.1.3.jar"
 }
-variable "sonarkdependencycheck" {
+variable "sonardependencycheck" {
     type    = string
     default = "sonar-dependency-check-plugin-3.0.1.jar"
 }

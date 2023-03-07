@@ -33,17 +33,16 @@ job "forge-sonarqube" {
             driver = "docker"
             # Ajout de plugins
             artifact {
-	    	    # source = "http://repo.proxy-dev-forge.asip.hst.fluxus.net/artifactory/ext-tools/qualimetrie/sonarqube-plugins/sonar-cnes-report-4.1.3.jar"
+	    	   
                 source = "http://repo.proxy-dev-forge.asip.hst.fluxus.net/artifactory/ext-tools/qualimetrie/sonarqube-plugins/${sonarcnesreport}"
-                # source = "https://repo.forge.ans.henix.fr:443/artifactory/ext-tools/qualimetrie/sonarqube-plugins/sonar-cnes-report-4.1.3.jar"
+                # source = "https://repo.forge.ans.henix.fr:443/artifactory/ext-tools/qualimetrie/sonarqube-plugins/${sonarcnesreport}"
                 options {
 		            archive = false
   		        }
 	        }
             artifact {
-                # source = "http://repo.proxy-dev-forge.asip.hst.fluxus.net/artifactory/ext-tools/qualimetrie/sonarqube-plugins/sonar-dependency-check-plugin-3.0.1.jar"
-	    	    source = "http://repo.proxy-dev-forge.asip.hst.fluxus.net/artifactory/ext-tools/qualimetrie/sonarqube-plugins/${sonarkdependencycheck}"
-                # source = "https://repo.forge.ans.henix.fr:443/artifactory/ext-tools/qualimetrie/sonarqube-plugins/sonar-dependency-check-plugin-3.0.1.jar" # Prod
+	    	    source = "http://repo.proxy-dev-forge.asip.hst.fluxus.net/artifactory/ext-tools/qualimetrie/sonarqube-plugins/${sonardependencycheck}"
+                # source = "https://repo.forge.ans.henix.fr:443/artifactory/ext-tools/qualimetrie/sonarqube-plugins/${sonardependencycheck}" # Prod
                 options {
 		            archive = false
   		        }
@@ -122,20 +121,18 @@ LDAP_GROUP_REQUEST=(&(objectClass=posixGroup)(memberUid={uid}))
                 # Mise en pace des plugins
                 mount {
                     type = "bind"
-                    # target = "/opt/sonarqube/extensions/plugins/sonar-cnes-report-4.1.3.jar"
                     target = "/opt/sonarqube/extensions/plugins/${sonarcnesreport}"
                     source = "local/${sonarcnesreport}"
-                    readonly = true
+                    # readonly = true
                     bind_options {
                         propagation = "rshared"
                     }
-                }
+                }                   
                 mount {
                     type = "bind"
-                    # target = "/opt/sonarqube/extensions/plugins/sonar-dependency-check-plugin-3.0.1.jar"
-                    target = "/opt/sonarqube/extensions/plugins/${sonarkdependencycheck}"
-                    source = "local/${sonarkdependencycheck}"
-                    readonly = true
+                    target = "/opt/sonarqube/extensions/plugins/${sonardependencycheck}"
+                    source = "local/${sonardependencycheck}"
+                    # readonly = true
                     bind_options {
                         propagation = "rshared"
                     }
