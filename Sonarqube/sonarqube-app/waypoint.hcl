@@ -48,3 +48,14 @@ variable "tag" {
     type    = string
     default = "9.9-developer"
 }
+
+# SONAR_CNES_REPORT=sonar-cnes-report-4.1.3.jar
+# SONAR_DEPENDENCY_CHECK=sonar-dependency-check-plugin-3.0.1.jar
+variable "SONAR_CNES_REPORT" {
+    type    = string
+    default = "sonar-cnes-report-4.1.3.jar"
+}
+variable "SONAR_DEPENDENCY_CHECK" {
+    type    = string
+    default = "sonar-dependency-check-plugin-3.0.1.jar"
+}

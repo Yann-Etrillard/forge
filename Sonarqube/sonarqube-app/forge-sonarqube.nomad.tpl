@@ -102,7 +102,6 @@ LDAP_USER_EMAILATTRIBUTE=mail
 LDAP_GROUP_BASEDN=ou=group,dc=asipsante,dc=fr
 LDAP_GROUP_REQUEST=(&(objectClass=posixGroup)(memberUid={uid}))
 
-
                 EOH
                 destination = "secrets/file.env"
                 change_mode = "restart"

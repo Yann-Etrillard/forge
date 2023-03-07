@@ -43,7 +43,6 @@ variable "image" {
     default = "postgres"
 }
 
-#On l'a laisse en latest? (si modfie voir squash-db)
 variable "tag" {
     type    = string
     default = "15.2"
