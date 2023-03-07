@@ -19,6 +19,10 @@ app "forge/sonarqube-app" {
         use "docker-pull" {
             image = var.image
             tag   = var.tag
+            
+            sonarcnesreport = var.sonarcnesreport
+            sonarkdependencycheck = var.sonarkdependencycheck
+
             disable_entrypoint = true
         }
     }
@@ -30,8 +34,8 @@ app "forge/sonarqube-app" {
             tag     = var.tag
             datacenter = var.datacenter
 
-            SONAR_CNES_REPORT = var.SONAR_CNES_REPORT
-            SONAR_DEPENDENCY_CHECK = var.SONAR_DEPENDENCY_CHECK
+            sonarcnesreport = var.sonarcnesreport
+            sonarkdependencycheck = var.sonarkdependencycheck
 
             })
         }
@@ -53,13 +57,11 @@ variable "tag" {
     default = "9.9-developer"
 }
 
-# SONAR_CNES_REPORT=sonar-cnes-report-4.1.3.jar
-# SONAR_DEPENDENCY_CHECK=sonar-dependency-check-plugin-3.0.1.jar
-variable "SONAR_CNES_REPORT" {
+variable "sonarcnesreport" {
     type    = string
     default = "sonar-cnes-report-4.1.3.jar"
 }
-variable "SONAR_DEPENDENCY_CHECK" {
+variable "sonarkdependencycheck" {
     type    = string
     default = "sonar-dependency-check-plugin-3.0.1.jar"
 }
