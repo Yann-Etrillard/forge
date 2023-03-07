@@ -28,9 +28,15 @@ job "forge-sonarqube" {
                 to = 9000
             }
         }
+        
+
+# SONAR_CNES_REPORT=sonar-cnes-report-4.1.3.jar
+# SONAR_DEPENDENCY_CHECK=sonar-dependency-check-plugin-3.0.1.jar
+
 
         task "sonarqube" {
-
+            driver = "docker"
+            
             # Ajout de plugins
             artifact {
 	    	    source = "http://repo.proxy-dev-forge.asip.hst.fluxus.net/artifactory/ext-tools/qualimetrie/sonarqube-plugins/$\u007BSONAR_CNES_REPORT\u007D"
@@ -55,7 +61,7 @@ job "forge-sonarqube" {
   		        }
 		    }           
 
-            driver = "docker"
+
 
             template {
                 data = <<EOH
@@ -96,11 +102,7 @@ LDAP_USER_EMAILATTRIBUTE=mail
 LDAP_GROUP_BASEDN=ou=group,dc=asipsante,dc=fr
 LDAP_GROUP_REQUEST=(&(objectClass=posixGroup)(memberUid={uid}))
 
-# Configuration des plugins
-{{ with secret "forge/sonarqube" }}
-SONAR_CNES_REPORT={{ .Data.data.sonar-cnes-report }}
-SONAR_DEPENDENCY_CHECK={{ .Data.data.sonar-dependency-check }}
-{{ end }}
+
                 EOH
                 destination = "secrets/file.env"
                 change_mode = "restart"
