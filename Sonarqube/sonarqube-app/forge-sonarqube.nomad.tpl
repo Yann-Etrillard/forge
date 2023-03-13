@@ -75,7 +75,7 @@ SONAR_SECRETKEYPATH=/opt/sonarqube/.sonar/sonar-secret.txt
 # JDBC Configuration
 SONAR_JDBC_USERNAME={{ with secret "forge/sonarqube" }}{{ .Data.data.psql_username }}{{ end }}
 SONAR_JDBC_PASSWORD={{ with secret "forge/sonarqube" }}{{ .Data.data.psql_password }}{{ end }}
-SONAR_JDBC_URL=jdbc:postgresql://{{ range service "forge-sonarqube-postgresql" }}{{.Address}}{{ end }}:{{ range service "forge-sonarqube-postgresql" }}{{.Port}}{{ end }}/sonar?currentSchema=sonar
+SONAR_JDBC_URL=jdbc:postgresql://sonar.db.internal:5432/sonar?currentSchema=sonar
 # LDAP Configuration
 LDAP_URL=ldap://{{ with secret "forge/sonarqube" }}{{ .Data.data.ldap_ip }}{{ end }}
 LDAP_BINDPASSWORD={{ with secret "forge/sonarqube" }}{{ .Data.data.ldap_password }}{{ end }}
@@ -100,6 +100,8 @@ LDAP_GROUP_REQUEST=(&(objectClass=posixGroup)(memberUid={uid}))
                 image   = "${image}:${tag}"
                 ports   = ["http"]
 
+                extra_hosts = ["sonar.db.internal:$\u007BNOMAD_IP_http\u007D"]
+                
                 mount {
                     type = "volume"
                     target = "/opt/sonarqube/data/"
@@ -173,7 +175,7 @@ LDAP_GROUP_REQUEST=(&(objectClass=posixGroup)(memberUid={uid}))
                     name     = "alive"
                     type     = "http"
                     path     = "/sonar"
-                    interval = "60s"
+                    interval = "30s"
                     timeout  = "5s"
                     port     = "http"
                 }
